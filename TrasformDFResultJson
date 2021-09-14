@@ -1,0 +1,4 @@
+val sqlContext = new org.apache.spark.sql.SQLContext(sc)
+val resultDF = sqlContext.sql("select c.codigo cod_concorrente, c.nome nome_concorrente, c.endereco, cast(c.faixa_preco as decimal(9,2)) preco_praticado, e.dayofweekFull, e.periodo, count(c.nome), b.area bairro, p.populacao, cast(p.populacao/b.area as decimal (13)) densidade from Vc as c left join Vb as b left join Ve as e left join Vp as p group by c.nome, c.codigo , c.endereco, c.faixa_preco, b.area, e.dayofweekFull, e.periodo, p.populacao")
+
+resultDF.write.json("/tmp/solution.json")
