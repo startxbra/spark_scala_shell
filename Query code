@@ -1,0 +1,14 @@
+It's difficult write a good query without aggragation, sorry but I can't execute this in my machine.
+
+spark.sql("select c.codigo cod_concorrente, c.nome nome_concorrente, c.endereco, cast(c.faixa_preco as decimal(9,2)) preco_praticado, cast(p.populacao/b.area as decimal (13)) densidade, e.dayofweekFull, e.periodo, cast(p.populacao/e.Dayofmonth/e.Dayofweek/e.hourofday/minuteofhour as decimal (9,2)) Fluxo_Dia, cast(p.populacao/Dayofmonth/e.Dayofweek as decimal (9,2)) Fluxo_periodo from Ve as e left join Vp as p left join Vb as b left join Vc as c on  b.codigo = p.codigo").show(3)
+
++----------------+----------------+--------------------+---------------+---------+-------------+-------+---------+-------------+
+| cod_concorrente|nome_concorrente|            endereco|preco_praticado|densidade|dayofweekFull|periodo|Fluxo_Dia|Fluxo_periodo|
++----------------+----------------+--------------------+---------------+---------+-------------+-------+---------+-------------+
+| 431962533652067|  Boizão Lanches| 13190-000 Monte Mor|           2.00|      128|     Thursday|Morning|     0.14|        64.57|
+|1663855903830869|   Bar do Serjão|Rua das Dracenas,...|           0.00|      128|     Thursday|Morning|     0.14|        64.57|
+| 567824576564110| Recanto Do Kuca|              Jarinu|           0.00|      128|     Thursday|Morning|     0.14|        64.57|
++----------------+----------------+--------------------+---------------+---------+-------------+-------+---------+-------------+
+
+I can't use max, min, avg and others because the limitation on my computer
+
