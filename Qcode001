@@ -1,0 +1,39 @@
+=> Variables environment
+export SPARK_HOME=/u01/spark
+export PATH=$PATH:$SPARK_HOME/bin:$SPARK_HOME/sbin
+
+=> Command prompt
+spark-shell
+
+=> Create Dataframes and transform columns
+var bairrosDF = spark.read.option("header","true").csv("/u01/files/bairros.csv")
+var concorrentesDF = spark.read.option("header","true").csv("/u01/files/concorrentes.csv")
+var eventos_de_fluxoDF = spark.read.option("header","true").csv("/u01/files/eventos_de_fluxo.csv.gz")
+eventos_de_fluxoDF = eventos_de_fluxoDF.withColumn("Hour",hour($"datetime")).
+|withColumn("Min",minute($"datetime")).
+|withColumn("Sec",second($"datetime")).
+|withColumn("monthofyear",date_format($"datetime","M/L")).
+|withColumn("Dayofweek",dayofweek($"datetime")).
+|withColumn("DayofMonth",date_format($"datetime","d")).
+|withColumn("DayofYear",date_format($"datetime","D")).
+|withColumn("hourofday",date_format($"datetime","H")).
+|withColumn("minuteofhour",date_format($"datetime","m")).
+|withColumn("dayofweekFull",date_format($"datetime","EEEE")).
+|withColumn("Periodo", expr("case when hour < '12' then 'Morning' " +
+                "when hour < '18' then 'Afternoon' " +
+                       "else 'Night' end"))
+
+var populacaoDF = spark.read.option("header","true").json("/u01/files/populacao.json")
+
+=> Create Views from Dataframes
+eventos_de_fluxoDF.createOrReplaceTempView("Ve")
+populacaoDF.createOrReplaceTempView("Vp")
+bairrosDF.createOrReplaceTempView("Vb")
+concorrentesDF.createOrReplaceTempView("Vc")
+
+=> Execute query
+spark.sql("select c.codigo cod_concorrente, c.nome nome_concorrente, c.endereco, cast(c.faixa_preco as decimal(9,2)) preco_praticado, e.dayofweekFull, e.periodo, avg(c.nome), b.area bairro, p.populacao, cast(p.populacao/b.area as decimal (13)) densidade from Vc as c left join Vb as b left join Ve as e left join Vp as p group by c.nome, c.codigo , c.endereco, c.faixa_preco, b.area, e.dayofweekFull, e.periodo, p.populacao")
+
+scala> spark.sql("select c.codigo cod_concorrente, c.nome nome_concorrente, c.endereco, cast(c.faixa_preco as decimal(9,2)) preco_praticado, e.dayofweekFull, e.periodo, avg(c.nome), b.area bairro, p.populacao, cast(p.populacao/b.area as decimal (13)) densidade from Vc as c left join Vb as b left join Ve as e left join Vp as p group by c.nome, c.codigo , c.endereco, c.faixa_preco, b.area, e.dayofweekFull, e.periodo, p.populacao")
+res5: org.apache.spark.sql.DataFrame = [cod_concorrente: string, nome_concorrente: string ... 8 more fields]
+
